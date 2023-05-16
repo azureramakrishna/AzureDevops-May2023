@@ -1,0 +1,39 @@
+WHY IAC?
+--------
+Neelima
+
+DEV:
+Webapp
+keyvault
+SQL
+LogAnalytics
+VNET
+RG
+NSG
+
+100 VMs
+500 SA
+
+Shiva
+Nonprod & PROD
+
+CODE
+Reusable
+Predictable
+Automated way of deployment
+
+
+Getting started with ARMTemplates:
+----------------------------------
+VSCode --> Extensions --> Azure Resource Manager Snippets
+
+ARMTemplates Elements/Strucure
+
+Schema
+ContentVersion
+Parameters
+Variables
+Resources
+Outputs
+
+

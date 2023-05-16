@@ -1,0 +1,61 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "storage_account_name": {
+           "type": "string",
+           "metadata": {
+                "description": "Name of the storage account"
+            }
+        },
+        "virtual_network_name": {
+           "type": "string",
+           "metadata": {
+                "description": "Name of the virtual network"
+            }
+        }
+    },
+    "variables": {
+        "tags": {
+            "project": "SAANVIK IT",
+            "department": "IT",
+            "environment": "DEV"
+        },
+        "vnet_ip": ["192.168.0.0/24"],
+        "subnet_name": "saanvikit-snet-01",
+        "subnet_address": ["192.168.0.0/27"]
+    },
+    "resources": [
+        {
+            "name": "[parameters('storage_account_name')]",
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2015-06-15",
+            "location": "[resourceGroup().location]",
+            "tags": "[variables('tags')]",
+            "properties": {
+                "accountType": "Standard_LRS"
+            }
+        },
+        {
+            "name": "[parameters('virtual_network_name')]",
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2018-08-01",
+            "location": "[resourceGroup().location]",
+            "tags": "[variables('tags')]",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": "[variables('vnet_ip')]"
+                },
+                "subnets": [
+                    {
+                        "name": "[variables('subnet_name')]",
+                        "properties": {
+                            "addressPrefix": "[variables('subnet_address')]"
+                        }
+                    }
+                ]
+            }
+        }
+    ],
+    "outputs": {}
+}
