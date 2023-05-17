@@ -8,11 +8,29 @@
                 "description": "Name of the storage account"
             }
         },
-        "virtual_network_name": {
+         "vnet_name": {
            "type": "string",
            "metadata": {
                 "description": "Name of the virtual network"
             }
+        },
+        "virtual_machine_name": {
+           "type": "string",
+           "metadata": {
+                "description": "Name of the virtual machine"
+            }
+        },
+        "vm_size": {
+           "type": "string",
+           "metadata": {
+                "description": "Size of the virtual machine"
+            }
+        },
+        "adminUser": {
+           "type": "string"           
+        },
+        "adminPassword": {
+           "type": "string"           
         }
     },
     "variables": {
@@ -21,9 +39,12 @@
             "department": "IT",
             "environment": "DEV"
         },
-        "vnet_ip": ["192.168.0.0/24"],
-        "subnet_name": "saanvikit-snet-01",
-        "subnet_address": ["192.168.0.0/27"]
+        "vnet_address": ["10.0.0.0/16"],
+        "snet_name": "saanvikit-snet",
+        "snet_address": "10.0.0.0/24",
+        "publicip_name": "saanvikit-pubip",
+        "nsg_name": "saanvikit-nsg",
+        "nic_name": "saanvikit-nic"
     },
     "resources": [
         {
@@ -37,25 +58,154 @@
             }
         },
         {
-            "name": "[parameters('virtual_network_name')]",
+            "name": "[parameters('vnet_name')]",
             "type": "Microsoft.Network/virtualNetworks",
             "apiVersion": "2018-08-01",
             "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsg_name'))]"
+            ],
             "tags": "[variables('tags')]",
             "properties": {
                 "addressSpace": {
-                    "addressPrefixes": "[variables('vnet_ip')]"
+                    "addressPrefixes": "[variables('vnet_address')]"
                 },
                 "subnets": [
                     {
-                        "name": "[variables('subnet_name')]",
+                        "name": "[variables('snet_name')]",
                         "properties": {
-                            "addressPrefix": "[variables('subnet_address')]"
+                            "addressPrefix": "[variables('snet_address')]",
+                            "networkSecurityGroup": {
+                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsg_name'))]"
+                            }
+                        }
+                    }
+                    
+                ]
+            }
+        },
+        {
+            "name": "[variables('publicip_name')]",
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "2020-11-01",
+            "location": "[resourceGroup().location]",
+            "tags": "[variables('tags')]",
+            "properties": {
+                "publicIPAllocationMethod": "Static",
+                "dnsSettings": {
+                    "domainNameLabel": "saanvikit"
+                }
+            }
+        },
+        {
+            "name": "[variables('nsg_name')]",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2018-08-01",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "RDP",
+                        "properties": {
+                            "description": "Allow_RDP",
+                            "protocol": "Tcp",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "3389",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 100,
+                            "direction": "Inbound"
+                        }
+                    },
+                    {
+                        "name": "HTTP",
+                        "properties": {
+                            "description": "Allow_HTTP",
+                            "protocol": "Tcp",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "80",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 200,
+                            "direction": "Inbound"
                         }
                     }
                 ]
             }
+        },
+        {
+            "name": "[variables('nic_name')]",
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2018-08-01",
+            "location": "[resourceGroup().location]",
+            "tags": "[variables('tags')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnet_name'))]",
+                "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicip_name'))]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipConfig1",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                             "publicIPAddress": {
+                                 "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicip_name'))]"
+                            },
+                            "subnet": {
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnet_name'), variables('snet_name'))]"
+                            }
+                           
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "[parameters('virtual_machine_name')]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2017-03-30",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces', variables('nic_name'))]"
+            ],
+            "tags": "[variables('tags')]",
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[parameters('vm_size')]"
+                },
+                "osProfile": {
+                    "computerName": "[parameters('virtual_machine_name')]",
+                    "adminUsername": "[parameters('adminUser')]",
+                    "adminPassword": "[parameters('adminPassword')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "MicrosoftWindowsServer",
+                        "offer": "WindowsServer",
+                        "sku": "2022-Datacenter",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "name": "[concat(parameters('virtual_machine_name'),'-osdisk')]",
+                        "caching": "ReadWrite",
+                        "createOption": "FromImage"
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nic_name'))]"
+                        }
+                    ]
+                }
+            }
+            
         }
+        
+        
     ],
     "outputs": {}
 }
