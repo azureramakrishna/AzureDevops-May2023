@@ -31,6 +31,9 @@
         },
         "adminPassword": {
            "type": "string"           
+        },
+        "count_value": {
+       "type": "int"
         }
     },
     "variables": {
@@ -85,15 +88,19 @@
             }
         },
         {
-            "name": "[variables('publicip_name')]",
+            "name": "[concat(variables('publicip_name'),'-',copyIndex(1))]",
             "type": "Microsoft.Network/publicIPAddresses",
             "apiVersion": "2020-11-01",
             "location": "[resourceGroup().location]",
             "tags": "[variables('tags')]",
+            "copy": {
+                "name": "PublicIPCopy",
+                "count": "[parameters('count_value')]"
+            },
             "properties": {
                 "publicIPAllocationMethod": "Static",
                 "dnsSettings": {
-                    "domainNameLabel": "saanvikit"
+                    "domainNameLabel": "[concat('saanvikit',copyIndex(1))]"
                 }
             }
         },
@@ -136,15 +143,19 @@
             }
         },
         {
-            "name": "[variables('nic_name')]",
+            "name": "[concat(variables('nic_name'),'-',copyIndex(1))]",
             "type": "Microsoft.Network/networkInterfaces",
             "apiVersion": "2018-08-01",
             "location": "[resourceGroup().location]",
             "tags": "[variables('tags')]",
             "dependsOn": [
                 "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnet_name'))]",
-                "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicip_name'))]"
+                "[resourceId('Microsoft.Network/publicIPAddresses', concat(variables('publicip_name'),'-',copyIndex(1)))]"
             ],
+            "copy": {
+                "name": "NicCopy",
+                "count": "[parameters('count_value')]"
+            },
             "properties": {
                 "ipConfigurations": [
                     {
@@ -152,7 +163,7 @@
                         "properties": {
                             "privateIPAllocationMethod": "Dynamic",
                              "publicIPAddress": {
-                                 "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicip_name'))]"
+                                 "id": "[resourceId('Microsoft.Network/publicIPAddresses', concat(variables('publicip_name'),'-',copyIndex(1)))]"
                             },
                             "subnet": {
                                 "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnet_name'), variables('snet_name'))]"
@@ -164,20 +175,24 @@
             }
         },
         {
-            "name": "[parameters('virtual_machine_name')]",
+            "name": "[concat(parameters('virtual_machine_name'),'-',copyIndex(1))]",
             "type": "Microsoft.Compute/virtualMachines",
             "apiVersion": "2017-03-30",
             "location": "[resourceGroup().location]",
             "dependsOn": [
-                "[resourceId('Microsoft.Network/networkInterfaces', variables('nic_name'))]"
+                "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('nic_name'),'-',copyIndex(1)))]"
             ],
+            "copy": {
+                "name": "VirtualMachineCopy",
+                "count": "[parameters('count_value')]"
+            },
             "tags": "[variables('tags')]",
             "properties": {
                 "hardwareProfile": {
                     "vmSize": "[parameters('vm_size')]"
                 },
                 "osProfile": {
-                    "computerName": "[parameters('virtual_machine_name')]",
+                    "computerName": "[concat(parameters('virtual_machine_name'),'-',copyIndex(1))]",
                     "adminUsername": "[parameters('adminUser')]",
                     "adminPassword": "[parameters('adminPassword')]"
                 },
@@ -189,7 +204,7 @@
                         "version": "latest"
                     },
                     "osDisk": {
-                        "name": "[concat(parameters('virtual_machine_name'),'-osdisk')]",
+                        "name": "[concat(parameters('virtual_machine_name'),'-osdisk','-',copyIndex(1))]",
                         "caching": "ReadWrite",
                         "createOption": "FromImage"
                     }
@@ -197,14 +212,13 @@
                 "networkProfile": {
                     "networkInterfaces": [
                         {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nic_name'))]"
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('nic_name'),'-',copyIndex(1)))]"
                         }
                     ]
                 }
             }
             
-        }
-        
+        }       
         
     ],
     "outputs": {}

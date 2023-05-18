@@ -1,0 +1,27 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "storage_account_name": {
+            "value": "saanvikit16052023"
+        },
+        "vnet_name": {
+            "value": "saanvikit-vnet"
+        },
+        "virtual_machine_name": {
+            "value": "saanvikit-vm"
+        },
+        "vm_size": {
+            "value": "Standard_Ds1_v2"
+        },
+        "adminUser": {
+            "value": "azureuser"
+        },
+        "adminPassword": {
+            "value": "Azuredevops@12345"
+        },
+        "count_value": {
+            "value": 5
+        }
+    }
+}
