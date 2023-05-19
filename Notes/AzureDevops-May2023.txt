@@ -76,4 +76,21 @@ ARMTemplates											Terraform
 			  Variables
 			  Resources
 			  Outputs 
-7. Deploy using powershell commands 
+7. Deploy using powershell commands 					7. Terraform Lifecycle 
+	New-AzResourceGroupDeployment '							Terraform init
+	-ResourceGroupName '									Terraform fmt
+	-TemplateFile '											Terraform validate
+	-TemplateParametersFile '								Terraform plan
+	-Verbose												Terraform apply 
+															Terraform destroy
+															
+Getting started:
+---------------
+Download Terraform - https://developer.hashicorp.com/terraform/downloads?product_intent=terraform
+Copy the terraform.exe file to C:\windows directory
+To validate open the cmd and type terraform 
+Install extensions in VSCode: HashiCorp Terraform & HashiCorp Terraform
+
+Azure Provider: azurerm
+AWS Provider: aws
+GCP Provider: google
