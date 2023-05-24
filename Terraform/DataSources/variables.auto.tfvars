@@ -1,0 +1,6 @@
+publicip_name = "terraform-pubip"
+nsg_name = "terraform-nsg"
+nic_name = "terraform-nic"
+virtual_machine_name = "terraform-vm"
+virtual_machine_size = "Standard_D2s_v3"
+adminUser = "terraform"

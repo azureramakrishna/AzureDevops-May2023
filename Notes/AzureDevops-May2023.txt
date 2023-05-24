@@ -94,3 +94,7 @@ Install extensions in VSCode: HashiCorp Terraform & HashiCorp Terraform
 Azure Provider: azurerm
 AWS Provider: aws
 GCP Provider: google
+
+Datasources:
+-----------
+JoF8Q~~rOJRfHZ_VubpKKQMi7eqIymQMvdYPTb9.
