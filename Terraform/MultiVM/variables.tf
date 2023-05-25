@@ -1,7 +1,7 @@
 variable "resource_group_name" {
   type        = string
   description = "Name of the Resource Group"
-  default     = "saanvikit-group"
+  default     = "saanvikit-terraform-rg"
 }
 
 variable "location" {
@@ -13,53 +13,53 @@ variable "location" {
 variable "storage_acount_name" {
   type        = string
   description = "Name of the storage account"
-  default     = "saanivkit2023123"
+  default     = "saanivkit20230519"
 }
 
 variable "virtual_network_name" {
   type        = string
   description = "Name of the virtual network"
-  default     = "saanvikit-vnet-01"
+  default     = "saanvikit-vnet"
 }
 
 variable "virtual_network_address" {
   type        = list
-  default     = ["172.16.0.0/24"]
+  default     = ["192.168.0.0/24"]
 }
 
 variable "subnet_name" {
   type        = string
   description = "Name of the subnet"
-  default     = "saanvikit-snet-01"
+  default     = "saanvikit-snet"
 }
 
 variable "subnet_address" {
   type        = list
-  default     = ["172.16.0.0/27"]
+  default     = ["192.168.0.0/24"]
 }
 
 variable "publicip_name" {
   type        = string
   description = "Name of the publicip"
-  default     = "saanvikit-pubip-01"
+  default     = "saanvikit-pubip"
 }
 
 variable "nsg_name" {
   type        = string
   description = "Name of the NSG"
-  default     = "saanvikit-nsg-01"
+  default     = "saanvikit-nsg"
 }
 
 variable "nic_name" {
   type        = string
   description = "Name of the NIC"
-  default     = "saanvikit-nic-01"
+  default     = "saanvikit-nic"
 }
 
 variable "virtual_machine_name" {
   type        = string
   description = "Name of the VM"
-  default     = "saanvikit-vm-01"
+  default     = "saanvikit-vm"
 }
 
 variable "virtual_machine_size" {
@@ -76,4 +76,9 @@ variable "adminUser" {
 variable "adminPassword" {
   type        = string
   default     = "Azuredevops@12345"
+}
+
+variable "count_value" {
+  type        = number
+  default     = 5
 }

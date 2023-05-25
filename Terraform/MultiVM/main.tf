@@ -10,6 +10,11 @@ terraform {
 # Configure the Microsoft Azure Provider
 provider "azurerm" {
   features {}
+
+  client_id       = "ce1425fc-f3d9-4afa-a1df-9786245f41fc"
+  client_secret   = "JoF8Q~~rOJRfHZ_VubpKKQMi7eqIymQMvdYPTb9."
+  tenant_id       = "459865f1-a8aa-450a-baec-8b47a9e5c904"
+  subscription_id = "6e4924ab-b00c-468f-ae01-e5d33e8786f8"
 }
 
 # Create a Resource Group
@@ -24,7 +29,7 @@ terraform {
     resource_group_name  = "cloud-shell-storage-centralindia"
     storage_account_name = "csg10032000825eeb72"
     container_name       = "tfstate"
-    key                  = "test.terraform.tfstate"
+    key                  = "multivm.terraform.tfstate"
   }
 }
 
@@ -56,7 +61,8 @@ resource "azurerm_subnet" "example" {
 
 # Create a publicip
 resource "azurerm_public_ip" "example" {
-  name                = var.publicip_name
+  name                = "${var.publicip_name}-${count.index}"                    
+  count               = var.count_value
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
   allocation_method   = "Static"
@@ -84,7 +90,8 @@ resource "azurerm_network_security_group" "example" {
 # create a NIC
 resource "azurerm_network_interface" "example" {
   depends_on = [ azurerm_public_ip.example, azurerm_subnet.example, azurerm_virtual_network.example ]
-  name                = var.nic_name
+  name                = "${var.nic_name}-${count.index}"           
+  count               = var.count_value
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
 
@@ -92,7 +99,7 @@ resource "azurerm_network_interface" "example" {
     name                          = "internal"
     subnet_id                     = azurerm_subnet.example.id
     private_ip_address_allocation = "Dynamic"
-    public_ip_address_id = azurerm_public_ip.example.id
+    public_ip_address_id = "${azurerm_public_ip.example[count.index].id}"
   }
 }
 
@@ -106,18 +113,19 @@ resource "azurerm_subnet_network_security_group_association" "example" {
 # Create a virtual machine
 resource "azurerm_windows_virtual_machine" "example" {
   depends_on = [ azurerm_network_interface.example ]
-  name                = var.virtual_machine_name
+  name                = "${var.virtual_machine_name}-${count.index}"
+  count               = var.count_value
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
   size                = var.virtual_machine_size
   admin_username      = var.adminUser
   admin_password      = var.adminPassword
   network_interface_ids = [
-    azurerm_network_interface.example.id,
+    "${azurerm_network_interface.example[count.index].id}",
   ]
 
   os_disk {
-    name                 = "${var.virtual_machine_name}-osdisk"
+    name                 = "${var.virtual_machine_name}-osdisk-${count.index}"
     caching              = "ReadWrite"
     storage_account_type = "Standard_LRS"
   }
@@ -128,13 +136,4 @@ resource "azurerm_windows_virtual_machine" "example" {
     sku       = "2022-Datacenter"
     version   = "latest"
   }
-}
-
-resource "azurerm_managed_disk" "example" {
-  name                 = "unknow"
-  location             = azurerm_resource_group.rg.location
-  resource_group_name  = azurerm_resource_group.rg.name
-  storage_account_type = "Standard_LRS"
-  create_option        = "Empty"
-  disk_size_gb         = 10
 }

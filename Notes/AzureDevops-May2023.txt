@@ -98,3 +98,22 @@ GCP Provider: google
 Datasources:
 -----------
 JoF8Q~~rOJRfHZ_VubpKKQMi7eqIymQMvdYPTb9.
+
+Scenarios:
+---------
+main.tf --> VM 
+added Data disk to VM manually 
+Terraform plan 
+
+drift
+
+Scenario2:
+---------
+terraform template --> VM 
+deleted the VM manually 
+
+terraform apply 
+
+Terraform Import:
+----------------
+terraform import azurerm_managed_disk.example /subscriptions/6e4924ab-b00c-468f-ae01-e5d33e8786f8/resourceGroups/SAANVIKIT-GROUP/providers/Microsoft.Compute/disks/test-disk
